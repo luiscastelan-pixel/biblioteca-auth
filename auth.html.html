@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Biblioteca Virtual - Login</title>
+    <style>
+        body { font-family: Arial; padding: 20px; max-width: 400px; margin: auto; }
+        input { width: 100%; padding: 10px; margin: 10px 0; }
+        button { width: 100%; padding: 10px; background: #4CAF50; color: white; border: none; }
+        .error { color: red; }
+        .success { color: green; }
+    </style>
+</head>
+<body>
+    <h2>Biblioteca Virtual</h2>
+    
+    <!-- Formulario de Registro -->
+    <h3>Registrarse</h3>
+    <input type="email" id="regEmail" placeholder="Correo electrónico">
+    <input type="password" id="regPassword" placeholder="Contraseña">
+    <button onclick="signUp()">Registrarse</button>
+
+    <!-- Formulario de Login -->
+    <h3>Iniciar Sesión</h3>
+    <input type="email" id="loginEmail" placeholder="Correo electrónico">
+    <input type="password" id="loginPassword" placeholder="Contraseña">
+    <button onclick="signIn()">Iniciar Sesión</button>
+
+    <!-- Botón de Cerrar Sesión -->
+    <button onclick="signOut()" style="background:#f44336;">Cerrar Sesión</button>
+
+    <div id="message"></div>
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+
+    <script>
+        // 🔴 ¡PEGA TU firebaseConfig AQUÍ! 🔴
+        const firebaseConfig = {
+            apiKey: "AIzaSyCScvNHnUdtkWO-QiGlnGMwRdwcxWk85g4",
+            authDomain: "biblioteca-aed11.firebaseapp.com",
+            projectId: "biblioteca-aed11",
+            storageBucket: "biblioteca-aed11.firebasestorage.app",
+ 	    messagingSenderId: "1019368173384",
+  	    appId: "1:1019368173384:web:56d8694c2d72bb1cb58d7d",
+ 	    measurementId: "G-N43VBZ8K83"
+
+        };
+
+        // Inicializar Firebase
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+
+        // Mostrar mensajes en la pantalla
+        function showMessage(text, isError = true) {
+            const msgDiv = document.getElementById('message');
+            msgDiv.innerHTML = text;
+            msgDiv.className = isError ? 'error' : 'success';
+            setTimeout(() => { msgDiv.innerHTML = ''; }, 3000);
+        }
+
+        // Función de Registro
+        window.signUp = function() {
+            const email = document.getElementById('regEmail').value;
+            const password = document.getElementById('regPassword').value;
+            
+            auth.createUserWithEmailAndPassword(email, password)
+                .then((userCredential) => {
+                    // Enviar datos a App Inventor
+                    const user = userCredential.user;
+                    window.AppInventor.setWebViewString(user.uid + ',' + user.email);
+                    showMessage('✅ Registro exitoso!', false);
+                })
+                .catch((error) => {
+                    showMessage('❌ Error: ' + error.message);
+                });
+        };
+
+        // Función de Login
+        window.signIn = function() {
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            
+            auth.signInWithEmailAndPassword(email, password)
+                .then((userCredential) => {
+                    const user = userCredential.user;
+                    window.AppInventor.setWebViewString(user.uid + ',' + user.email);
+                    showMessage('✅ Login exitoso!', false);
+                })
+                .catch((error) => {
+                    showMessage('❌ Error: ' + error.message);
+                });
+        };
+
+        // Función de Cerrar Sesión
+        window.signOut = function() {
+            auth.signOut()
+                .then(() => {
+                    window.AppInventor.setWebViewString('logged_out');
+                    showMessage('✅ Sesión cerrada', false);
+                })
+                .catch((error) => {
+                    showMessage('❌ Error: ' + error.message);
+                });
+        };
+
+        // Verificar si ya hay sesión activa al cargar
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                window.AppInventor.setWebViewString(user.uid + ',' + user.email);
+            }
+        });
+    </script>
+</body>
+</html>
